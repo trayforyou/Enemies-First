@@ -6,34 +6,22 @@ using UnityEngine;
 public class Enemy : MonoBehaviour
 {
     [SerializeField] private float _speed = 10.0f;
-    private bool _isMove;
 
-    public event Action<Enemy> LeftZone;
-
-    private void OnEnable()
-    {
-        _isMove = true;
-    }
-
-    private void OnDisable()
-    {
-        _isMove = false;
-    }
+    public event Action<Enemy> HasLeft;
 
     private void Update()
     {
-        if (_isMove)
         transform.Translate(Vector3.forward * Time.deltaTime * _speed);
     }
 
     private void OnCollisionExit(Collision collision)
     {
         if (collision.collider.TryGetComponent<Terrain>(out _))
-            LeftZone?.Invoke(GetComponent<Enemy>());
+            HasLeft?.Invoke(GetComponent<Enemy>());
     }
 
-    public void GetRigidbody(out Rigidbody rigidbody)
+    public Rigidbody GetRigidbody()
     {
-        rigidbody = GetComponent<Rigidbody>();
+        return GetComponent<Rigidbody>();
     }
 }

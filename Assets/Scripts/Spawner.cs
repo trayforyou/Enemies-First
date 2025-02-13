@@ -5,12 +5,12 @@ using UnityEngine.Pool;
 
 public class Spawner : MonoBehaviour
 {
-    [SerializeField] private List<Spawn> _spawnList;
+    [SerializeField] private List<SpawnPoint> _spawnList;
     [SerializeField] private Enemy _enemy;
-
     [SerializeField] private int _defaultPoolSize = 5;
     [SerializeField] private int _defaultMaxSize = 5;
     [SerializeField] private float _createFrequency = 2f;
+    
     private ObjectPool<Enemy> _enemyPool;
     private bool _isSpawning;
     private Coroutine _coroutine;
@@ -19,7 +19,7 @@ public class Spawner : MonoBehaviour
     {
         _enemyPool = new ObjectPool<Enemy>
             (
-            createFunc: () => CreateNewEnemy(),
+            createFunc: () => CreateEnemy(),
             actionOnGet: (enemy) => SpawnEnemy(enemy),
             actionOnRelease: (enemy) => enemy.gameObject.SetActive(false),
             actionOnDestroy: (enemy) => DestroyEnemy(enemy),
@@ -43,17 +43,17 @@ public class Spawner : MonoBehaviour
     }
 
 
-    private Enemy CreateNewEnemy()
+    private Enemy CreateEnemy()
     {
         Enemy newEnemy = Instantiate(_enemy);
-        newEnemy.LeftZone += Hide;
+        newEnemy.HasLeft += Hide;
 
         return newEnemy;
     }
 
     private void SpawnEnemy(Enemy enemy)
     {
-        enemy.GetRigidbody(out Rigidbody currentRigidbody);
+        Rigidbody currentRigidbody = enemy.GetRigidbody();
 
         currentRigidbody.linearVelocity = Vector3.zero;
         currentRigidbody.angularVelocity = Vector3.zero;
@@ -69,7 +69,7 @@ public class Spawner : MonoBehaviour
 
     private void DestroyEnemy(Enemy enemy)
     {
-        enemy.LeftZone -= Hide;
+        enemy.HasLeft -= Hide;
 
         Destroy(enemy.gameObject);
     }
@@ -91,7 +91,7 @@ public class Spawner : MonoBehaviour
 
         while (_isSpawning)
         {
-            Spawn curentSpawnPoint = _spawnList[UnityEngine.Random.Range(0, _spawnList.Count)];
+            SpawnPoint curentSpawnPoint = _spawnList[UnityEngine.Random.Range(0, _spawnList.Count)];
             currentEnemy = _enemyPool.Get();
             int newRotate = GetRandomRotate();
             currentEnemy.transform.position = curentSpawnPoint.transform.position;
