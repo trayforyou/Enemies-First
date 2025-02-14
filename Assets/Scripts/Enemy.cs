@@ -7,21 +7,34 @@ public class Enemy : MonoBehaviour
 {
     [SerializeField] private float _speed = 10.0f;
 
-    public event Action<Enemy> HasLeft;
+    private Target _target;
+
+    private Rigidbody _rigidbody;
+    public event Action<Enemy> TargetTouched;
+
+    private void Awake()
+    {
+        _rigidbody = GetComponent<Rigidbody>();
+    }
 
     private void Update()
     {
-        transform.Translate(Vector3.forward * Time.deltaTime * _speed);
+        transform.position = Vector3.MoveTowards(transform.position, _target.transform.position, Time.deltaTime * _speed);
     }
 
-    private void OnCollisionExit(Collision collision)
+    private void OnCollisionEnter(Collision collision)
     {
-        if (collision.collider.TryGetComponent<Terrain>(out _))
-            HasLeft?.Invoke(GetComponent<Enemy>());
+        if (collision.collider.TryGetComponent(out Target currentTarget) && (currentTarget == _target))
+            TargetTouched?.Invoke(this);
+    }
+
+    public void GiveTarget(Target target)
+    {
+        _target = target;
     }
 
     public Rigidbody GetRigidbody()
     {
-        return GetComponent<Rigidbody>();
+        return _rigidbody;
     }
 }

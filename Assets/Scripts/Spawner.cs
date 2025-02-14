@@ -42,11 +42,10 @@ public class Spawner : MonoBehaviour
         _isSpawning = false;
     }
 
-
     private Enemy CreateEnemy()
     {
         Enemy newEnemy = Instantiate(_enemy);
-        newEnemy.HasLeft += Hide;
+        newEnemy.TargetTouched += Hide;
 
         return newEnemy;
     }
@@ -69,18 +68,9 @@ public class Spawner : MonoBehaviour
 
     private void DestroyEnemy(Enemy enemy)
     {
-        enemy.HasLeft -= Hide;
+        enemy.TargetTouched -= Hide;
 
         Destroy(enemy.gameObject);
-    }
-    private int GetRandomRotate()
-    {
-        int minRotate = 0;
-        int maxRotate = 360;
-
-        int yPoint = Random.Range(minRotate, maxRotate);
-
-        return yPoint;
     }
 
     private IEnumerator SpawnEnemies()
@@ -91,12 +81,12 @@ public class Spawner : MonoBehaviour
 
         while (_isSpawning)
         {
-            SpawnPoint curentSpawnPoint = _spawnList[UnityEngine.Random.Range(0, _spawnList.Count)];
+            SpawnPoint currentSpawnPoint = _spawnList[UnityEngine.Random.Range(0, _spawnList.Count)];
+            Target currentTarget = currentSpawnPoint.TargetPosition;
             currentEnemy = _enemyPool.Get();
-            int newRotate = GetRandomRotate();
-            currentEnemy.transform.position = curentSpawnPoint.transform.position;
+            currentEnemy.transform.position = currentSpawnPoint.transform.position;
 
-            currentEnemy.transform.Rotate(Vector3.up * newRotate);
+            currentEnemy.GiveTarget(currentTarget);
 
             yield return wait;
         }
